@@ -26,9 +26,8 @@ const router = createRouter({
 })
 
 // 路由跳转规则
-
 router.beforeEach((to) => {
-  if (to.path !== 'login') {
+  if (to.path !== '/login') {
     const token = localCache.getCache('token')
     if (!token) {
       return '/login'

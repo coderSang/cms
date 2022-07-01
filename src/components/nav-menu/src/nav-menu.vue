@@ -23,15 +23,15 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useRoute } from 'vue-router'
 import { useRouter } from 'vue-router';
 import { useLoginStore } from '@/stores/login';
 
-import { firstMenu } from '@/utils/map-menus';
-
 const loginStore = useLoginStore();
 const router = useRouter();
-
-const selectedKeys = ref<string[]>([firstMenu.path]);
+// router
+const route = useRoute()
+const selectedKeys = ref<string[]>([route.path]);
 const menusPermission = computed(() => loginStore.userMenus);
 
 interface menuItem {

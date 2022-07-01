@@ -1,54 +1,95 @@
 <template>
-  <div class="header"></div>
-  <a-form :form="formState" layout="inline" >
-    <a-form-item
-      v-for="column in config"
-      :key="column.key"
-      :name="column.label"
-      :label="column.label"
-      class="form-item-margin"
-    >
-      <component
-        v-bind:is="column.type || 'a-input'"
-        v-bind="column.props"
-        :size="size"
-        v-model:value="formState[column.key]"
-        v-on="column.on || {}"
-      ></component>
-    </a-form-item>
-    <a-form-item class="form-item-margin">
-      <a-button type="primary" @click="handleSearch">搜索</a-button>
-      <a-button class="left-btn-split" @click="handleReset">重置</a-button>
-    </a-form-item>
-  </a-form>
+  <div class="page-search">
+    <div class="header"></div>
+    <a-card>
+      <base-form v-bind="searchFormConfig" v-model="formData">
+        <template v-slot:header>
+          <div v-if="headerMode === 'title'" class="left-part">{{ headerText }}</div>
+          <div v-else class="left-part">
+            <bread-crumb :arrBread="arrBread"></bread-crumb>
+          </div>
+        </template>
+        <template v-slot:footer>
+          <a-button type="primary btns-group" @click="handleQueryClick">搜索</a-button>
+          <a-button class="left-btn-split btns-group" @click="handleResetClick">重置</a-button>
+        </template>
+      </base-form>
+    </a-card>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { defineProps, reactive, withDefaults} from 'vue';
-// 定义props
+import BaseForm from '@/base-ui/form';
+import BreadCrumb from '@/base-ui/breadcrumb';
+
+import { withDefaults, ref, computed } from 'vue';
+import { useRoute } from 'vue-router';
+import localCache from '@/utils/cache';
+import { mapRouteToName, pathBreadcrumbs } from '@/utils/map-menus';
+import { IFormConfig } from '../types';
+
 const props = withDefaults(
-    defineProps<{
-      config: any[]
-      size: string
-    }>(),
-    {
-      size: 'default'
-    }
+  defineProps<{
+    searchFormConfig: IFormConfig
+    headerMode?: 'title' | 'bread'
+  }>(),{
+    headerMode: 'title'
+  }
 )
-const formState = reactive({});
-const handleReset = () => {
-  console.log(formState);
+const emit = defineEmits(['resetBtnClick', 'queryBtnClick'])
+
+// 获取文字类型的头
+const route = useRoute();
+const userMenus = localCache.getCache('userMenus')
+const mapRoute = mapRouteToName(userMenus);
+const headerText = computed(() => {
+  return mapRoute[route.path]
+})
+
+// 获取面包屑的方式
+const arrBread = computed(() => pathBreadcrumbs(userMenus, route.path));
+
+const formItems = props.searchFormConfig?.formItems ?? []
+const formOriginData: any = {}
+// 时间范围选择器有多个key和value
+for (const item of formItems) {
+  if (item.type === 'a-range-picker') {
+    item.key.forEach((singleItem: any, index: number) => {
+      formOriginData[singleItem] = item.defaultValue !== undefined ? item.defaultValue[index] : ''
+    })
+  } else if(item.type === 'a-select') {
+    formOriginData[item.key] = item.defaultValue ?? undefined
+  } else {
+    formOriginData[item.key] = item.defaultValue ?? ''
+  }
 }
-const handleSearch = () => {
-  console.log(formState);
+// 转换为响应式对象
+const formData = ref(formOriginData)
+// 用户点击重置,重置为原始值
+const handleResetClick = () => {
+  for (const key in formOriginData) {
+    formData.value[key] = formOriginData[key]
+  }
+  emit('resetBtnClick', formOriginData)
+}
+// 用户搜索
+const handleQueryClick = () => {
+  emit('queryBtnClick', formData.value)
 }
 </script>
 
 <style scoped lang="less">
-.form-item-margin{
-  margin-top: 10px;
+.page-search{
+  margin: 10px 10px 5px;
   .left-btn-split {
     margin-left: 8px;
   }
+  .btns-group {
+    border-radius: 5px;
+  }
+  .left-part{
+    float: left;
+  }
 }
+
 </style>

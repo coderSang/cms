@@ -1,12 +1,10 @@
 import { defineStore } from 'pinia';
-
+import { useConstantStore } from '@/stores/constant';
 import localCache from '@/utils/cache'
 import router from '@/router';
-
 import { getCache, getLogin, getUserInfo, getMenus } from '@/service/login';
 import { ILoginType } from '@/service/types'
 import { mapMenusToRoutes } from '@/utils/map-menus';
-
 export const useLoginStore = defineStore('login', {
   state: () => {
     return {
@@ -15,6 +13,11 @@ export const useLoginStore = defineStore('login', {
       userInfo: null,
       userMenus: [],
       counter: 6,
+      permissions: [
+        'system:user:insert','system:user:import','system:user:update',
+        'system:user:delete',
+        'system:dept:insert', 'system:dept:update', 'system:dept:delete',
+      ],
     };
   },
   actions: {
@@ -33,6 +36,8 @@ export const useLoginStore = defineStore('login', {
       await this.getUserInfo()
       await this.getMenus()
       await this.mapToMenus();
+      const constantStore = useConstantStore();
+      await constantStore.loadConstantData();
       await router.push('/main')
     },
     // 获取用户信息
@@ -67,8 +72,8 @@ export const useLoginStore = defineStore('login', {
       const userMenus = localCache.getCache('userMenus');
       if (userMenus) {
         this.userMenus = userMenus;
+        await this.mapToMenus();
       }
-      await this.mapToMenus();
     }
   }
 });

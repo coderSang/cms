@@ -3,5 +3,5 @@ export default {
   path: '/admin/user/index',
   name: 'user',
   component: index,
-  children: []
+  children: [],
 }

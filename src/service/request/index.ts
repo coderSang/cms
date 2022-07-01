@@ -2,7 +2,6 @@ import axios from 'axios';
 import type { AxiosInstance } from 'axios'
 import { myRequestInterceptors, myRequestConfig } from '@/service/request/type';
 
-
 class MyRequest {
   instance: AxiosInstance
   interceptors?: myRequestInterceptors
@@ -51,6 +50,12 @@ class MyRequest {
   }
   post<T = any>(config: myRequestConfig<T>): Promise<T> {
     return this.request({ ...config, method: 'POST' })
+  }
+  put<T = any>(config: myRequestConfig<T>): Promise<T> {
+    return this.request({ ...config, method: 'PUT' })
+  }
+  delete<T = any>(config: myRequestConfig<T>): Promise<T> {
+    return this.request({ ...config, method: 'DELETE' })
   }
 }
 

@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 
 import 'ant-design-vue/dist/antd.css';
+import '@/assets/base.less';
 
 import App from './App.vue';
 import pinia from '@/stores';

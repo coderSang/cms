@@ -17,7 +17,7 @@
           </a-menu-item>
         </a-menu>
       </template>
-      <span>
+      <span class="user-name">
         <user-outlined />
         {{ loginStore.userInfo.userName }}
         <DownOutlined />
@@ -48,6 +48,9 @@ const handleMenuClick = (e: any) => {
   justify-content: space-between;
   .user-handle {
     font-size: 18px;
+    .user-name{
+      cursor: pointer;
+    }
   }
 }
 </style>
